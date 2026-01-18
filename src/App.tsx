@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SiteSettingsProvider } from "@/contexts/SiteSettingsContext";
+import { CloudinaryProvider } from "@/contexts/CloudinaryContext";
 import "@/lib/i18n";
 
 import Landing from "./pages/Landing";
@@ -22,20 +23,22 @@ const App = () => (
     <AuthProvider>
       <ThemeProvider>
         <SiteSettingsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/order/:slug" element={<OrderPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+          <CloudinaryProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/dashboard" element={<UserDashboard />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/order/:slug" element={<OrderPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CloudinaryProvider>
         </SiteSettingsProvider>
       </ThemeProvider>
     </AuthProvider>

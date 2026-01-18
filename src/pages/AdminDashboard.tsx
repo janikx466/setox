@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { Service, subscribeToServices, addService, updateService, deleteService } from '@/lib/services';
-import { updateFirebaseConfig, setCloudinaryName, getCloudinaryName } from '@/lib/firebase';
+import { updateFirebaseConfig, setCloudinaryName, getCloudinaryName, subscribeToCloudinarySettings } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -91,8 +91,15 @@ const AdminDashboard: React.FC = () => {
       return;
     }
 
-    const unsubscribe = subscribeToServices(setServices);
-    return () => unsubscribe();
+    const unsubServices = subscribeToServices(setServices);
+    const unsubCloudinary = subscribeToCloudinarySettings((name) => {
+      setCloudinaryForm({ cloudName: name });
+    });
+    
+    return () => {
+      unsubServices();
+      unsubCloudinary();
+    };
   }, [user, role, navigate, toast, t]);
 
   useEffect(() => {
@@ -200,14 +207,18 @@ const AdminDashboard: React.FC = () => {
     updateFirebaseConfig(firebaseForm);
   };
 
-  const handleSaveCloudinarySettings = () => {
+  const handleSaveCloudinarySettings = async () => {
     if (isDemoAdmin) {
       showDemoRestriction();
       return;
     }
 
-    setCloudinaryName(cloudinaryForm.cloudName);
-    toast({ title: t('common.success') });
+    try {
+      await setCloudinaryName(cloudinaryForm.cloudName);
+      toast({ title: t('common.success') });
+    } catch (error) {
+      toast({ title: t('common.error'), variant: 'destructive' });
+    }
   };
 
   const handleLogout = async () => {

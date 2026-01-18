@@ -1,6 +1,6 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, Firestore, doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 // Default Firebase configuration
 const defaultConfig = {
@@ -35,10 +35,30 @@ export const updateFirebaseConfig = (newConfig: typeof defaultConfig) => {
   window.location.reload();
 };
 
+// Cloudinary name stored in Firestore for cross-device sync
 export const getCloudinaryName = (): string => {
   return localStorage.getItem('cloudinaryName') || '';
 };
 
-export const setCloudinaryName = (name: string) => {
+export const setCloudinaryName = async (name: string) => {
   localStorage.setItem('cloudinaryName', name);
+  // Also save to Firestore for cross-device sync
+  try {
+    await setDoc(doc(db, 'settings', 'cloudinary'), { cloudName: name }, { merge: true });
+  } catch (error) {
+    console.error('Failed to save Cloudinary name to Firestore:', error);
+  }
+};
+
+// Subscribe to Cloudinary settings from Firestore
+export const subscribeToCloudinarySettings = (callback: (name: string) => void) => {
+  return onSnapshot(doc(db, 'settings', 'cloudinary'), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.cloudName) {
+        localStorage.setItem('cloudinaryName', data.cloudName);
+        callback(data.cloudName);
+      }
+    }
+  });
 };

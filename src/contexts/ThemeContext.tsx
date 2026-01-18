@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 type ThemeName = 
   | 'default' 
@@ -47,6 +49,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return (saved as ThemeName) || 'default';
   });
 
+  // Subscribe to theme changes from Firestore for cross-device sync
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'settings', 'theme'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.themeName && data.themeName !== currentTheme) {
+          setCurrentTheme(data.themeName as ThemeName);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
     
@@ -65,8 +81,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('theme', currentTheme);
   }, [currentTheme]);
 
-  const setTheme = (theme: ThemeName) => {
+  const setTheme = async (theme: ThemeName) => {
     setCurrentTheme(theme);
+    // Save to Firestore for cross-device sync
+    try {
+      await setDoc(doc(db, 'settings', 'theme'), { themeName: theme }, { merge: true });
+    } catch (error) {
+      console.error('Failed to save theme to Firestore:', error);
+    }
   };
 
   return (
