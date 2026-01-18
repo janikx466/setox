@@ -50,18 +50,32 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubSite = onSnapshot(doc(db, 'settings', 'site'), (doc) => {
-      if (doc.exists()) {
-        setSiteSettings({ ...defaultSiteSettings, ...doc.data() });
+    // Public real-time listeners - no auth required
+    const unsubSite = onSnapshot(
+      doc(db, 'settings', 'site'), 
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setSiteSettings({ ...defaultSiteSettings, ...docSnap.data() });
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error loading site settings:', error);
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
 
-    const unsubPayment = onSnapshot(doc(db, 'settings', 'payment'), (doc) => {
-      if (doc.exists()) {
-        setPaymentSettings({ ...defaultPaymentSettings, ...doc.data() });
+    const unsubPayment = onSnapshot(
+      doc(db, 'settings', 'payment'), 
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setPaymentSettings({ ...defaultPaymentSettings, ...docSnap.data() });
+        }
+      },
+      (error) => {
+        console.error('Error loading payment settings:', error);
       }
-    });
+    );
 
     return () => {
       unsubSite();
