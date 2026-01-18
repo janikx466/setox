@@ -70,13 +70,27 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const updateSiteSettings = async (settings: Partial<SiteSettings>) => {
-    const newSettings = { ...siteSettings, ...settings };
-    await setDoc(doc(db, 'settings', 'site'), newSettings);
+    try {
+      const newSettings = { ...siteSettings, ...settings };
+      await setDoc(doc(db, 'settings', 'site'), newSettings);
+    } catch (error: any) {
+      if (error?.code === 'permission-denied') {
+        throw new Error('Firebase permission denied. Please update your Firestore security rules to allow writes. Go to Firebase Console → Firestore Database → Rules and set appropriate permissions.');
+      }
+      throw error;
+    }
   };
 
   const updatePaymentSettings = async (settings: Partial<PaymentSettings>) => {
-    const newSettings = { ...paymentSettings, ...settings };
-    await setDoc(doc(db, 'settings', 'payment'), newSettings);
+    try {
+      const newSettings = { ...paymentSettings, ...settings };
+      await setDoc(doc(db, 'settings', 'payment'), newSettings);
+    } catch (error: any) {
+      if (error?.code === 'permission-denied') {
+        throw new Error('Firebase permission denied. Please update your Firestore security rules to allow writes.');
+      }
+      throw error;
+    }
   };
 
   return (
