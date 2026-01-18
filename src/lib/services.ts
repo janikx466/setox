@@ -23,16 +23,37 @@ export const subscribeToServices = (callback: (services: Service[]) => void) => 
 };
 
 export const addService = async (service: Omit<Service, 'id' | 'createdAt'>) => {
-  await addDoc(collection(db, 'services'), {
-    ...service,
-    createdAt: Date.now()
-  });
+  try {
+    await addDoc(collection(db, 'services'), {
+      ...service,
+      createdAt: Date.now()
+    });
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      throw new Error('Firebase permission denied. Please update your Firestore security rules in Firebase Console.');
+    }
+    throw error;
+  }
 };
 
 export const updateService = async (id: string, service: Partial<Service>) => {
-  await updateDoc(doc(db, 'services', id), service);
+  try {
+    await updateDoc(doc(db, 'services', id), service);
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      throw new Error('Firebase permission denied. Please update your Firestore security rules in Firebase Console.');
+    }
+    throw error;
+  }
 };
 
 export const deleteService = async (id: string) => {
-  await deleteDoc(doc(db, 'services', id));
+  try {
+    await deleteDoc(doc(db, 'services', id));
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      throw new Error('Firebase permission denied. Please update your Firestore security rules in Firebase Console.');
+    }
+    throw error;
+  }
 };

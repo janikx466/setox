@@ -558,17 +558,37 @@ const AdminDashboard: React.FC = () => {
               <h2 className="text-2xl font-display font-bold">{t('admin.cloudinarySettings')}</h2>
               
               <div className="glass-card rounded-xl p-6 space-y-4">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Enter your Cloudinary cloud name for image uploads. Make sure you have an unsigned upload preset named "ml_default".
-                </p>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mb-2">
+                    ⚠️ Important: Cloud Name ≠ Upload Preset
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Your <strong>Cloud Name</strong> is found in your Cloudinary Dashboard (looks like "dxxxxxxxx" or a custom name you set). It is NOT "ml_default" - that's the upload preset name.
+                  </p>
+                </div>
+
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-medium mb-2">📋 Setup Requirements:</p>
+                  <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                    <li>Go to <a href="https://cloudinary.com/console" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudinary Dashboard</a></li>
+                    <li>Copy your <strong>Cloud Name</strong> from the top of the dashboard</li>
+                    <li>Go to Settings → Upload → Add upload preset</li>
+                    <li>Create an <strong>unsigned</strong> preset named "ml_default"</li>
+                  </ol>
+                </div>
 
                 <div className="space-y-2">
                   <Label>Cloud Name</Label>
                   <Input
                     value={cloudinaryForm.cloudName}
                     onChange={(e) => setCloudinaryForm({ ...cloudinaryForm, cloudName: e.target.value })}
-                    placeholder="your-cloud-name"
+                    placeholder="e.g., dxxxxxxxx or your-custom-name"
                   />
+                  {cloudinaryForm.cloudName === 'ml_default' && (
+                    <p className="text-sm text-destructive">
+                      ❌ "ml_default" is the upload preset, not the cloud name!
+                    </p>
+                  )}
                 </div>
 
                 <Button onClick={handleSaveCloudinarySettings} className="w-full">
